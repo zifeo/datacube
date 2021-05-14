@@ -14,7 +14,7 @@
     "deploy": "rimraf dist && npm run build && npx clasp push",
     "serve": "cross-env NODE_ENV=development webpack-dev-server",
     "start": "npm run deploy:dev && npm run serve",
-    "lint": "eslint --fix \"./{src}/**/*.{js,jsx,ts,tsx}\""
+    "lint": "eslint --fix \"./{dev,src}/**/*.{js,jsx,ts,tsx}\""
   },
   "engines": {
     "node": ">=10.0.0",
