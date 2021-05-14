@@ -150,12 +150,12 @@ const DynamicCdnWebpackPluginConfig = {
           version: packageVersion,
           url: `https://unpkg.com/react-transition-group@${packageVersion}/dist/react-transition-group${packageSuffix}`,
         };
-      case 'react-bootstrap':
+      case '@material-ui/core':
         return {
           name: packageName,
-          var: 'ReactBootstrap',
+          var: 'MaterialUI',
           version: packageVersion,
-          url: `https://unpkg.com/react-bootstrap@${packageVersion}/dist/react-bootstrap${packageSuffix}`,
+          url: `https://unpkg.com/@material-ui/core@${packageVersion}/umd/material-ui.${isProd ? 'production.min': 'development'}.js`,
         };
       default:
         return null;

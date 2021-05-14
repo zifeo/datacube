@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '@material-ui/core';
 
 import server from '../../utils/server';
 
@@ -28,6 +29,7 @@ class About extends React.Component {
           Visit the Github repo for more information on how to use this project.
         </p>
         <p>- Elisha Nuchi</p>
+        <Button color="primary">Hello World</Button>
         <a
           href="https://www.github.com/enuchi/React-Google-Apps-Script"
           target="_blank"
