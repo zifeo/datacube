@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "lib": [ "es2015", "DOM" ],
     "types": ["gas-types-detailed"],
     "jsx": "react",
     "esModuleInterop": true
