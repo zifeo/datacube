@@ -1,3 +1,6 @@
+declare var SpreadsheetApp;
+declare var HtmlService;
+
 export const onOpen = () => {
   const menu = SpreadsheetApp.getUi()
     .createMenu('DataCube')
