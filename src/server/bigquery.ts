@@ -1,4 +1,3 @@
-
 declare var BigQuery;
 
 /**
@@ -9,54 +8,53 @@ declare var BigQuery;
  * @customfunction
  */
 export const TEST = query => {
+  const projectId = '';
 
-    var projectId = '';
+  const request = {
+    query,
+  };
+  let queryResults = BigQuery.Jobs.query(request, projectId);
+  const { jobId } = queryResults.jobReference;
 
-    var request = {
-        query: query
-    };
-    var queryResults = BigQuery.Jobs.query(request, projectId);
-    var jobId = queryResults.jobReference.jobId;
+  // Check on status of the Query Job.
+  let sleepTimeMs = 500;
+  while (!queryResults.jobComplete) {
+    Utilities.sleep(sleepTimeMs);
+    sleepTimeMs *= 2;
+    queryResults = BigQuery.Jobs.getQueryResults(projectId, jobId);
+  }
 
-    // Check on status of the Query Job.
-    var sleepTimeMs = 500;
-    while (!queryResults.jobComplete) {
-        Utilities.sleep(sleepTimeMs);
-        sleepTimeMs *= 2;
-        queryResults = BigQuery.Jobs.getQueryResults(projectId, jobId);
+  // Get all the rows of results.
+  let { rows } = queryResults;
+  while (queryResults.pageToken) {
+    queryResults = BigQuery.Jobs.getQueryResults(projectId, jobId, {
+      pageToken: queryResults.pageToken,
+    });
+    rows = rows.concat(queryResults.rows);
+  }
+
+  if (rows) {
+    const sheet = SpreadsheetApp.getActiveSheet();
+
+    // Append the headers.
+    const headers = queryResults.schema.fields.map(field => {
+      return field.name;
+    });
+    sheet.appendRow(headers);
+
+    // Append the results.
+    const data = new Array(rows.length);
+    for (let i = 0; i < rows.length; i += 1) {
+      const cols = rows[i].f;
+      data[i] = new Array(cols.length);
+      for (let j = 0; j < cols.length; j += 1) {
+        data[i][j] = cols[j].v;
+      }
     }
+    sheet.getRange(2, 1, rows.length, headers.length).setValues(data);
 
-    // Get all the rows of results.
-    var rows = queryResults.rows;
-    while (queryResults.pageToken) {
-        queryResults = BigQuery.Jobs.getQueryResults(projectId, jobId, {
-        pageToken: queryResults.pageToken
-        });
-        rows = rows.concat(queryResults.rows);
-    }
-
-    if (rows) {
-        var sheet = SpreadsheetApp.getActiveSheet();
-
-        // Append the headers.
-        var headers = queryResults.schema.fields.map(function(field) {
-        return field.name;
-        });
-        sheet.appendRow(headers);
-
-        // Append the results.
-        var data = new Array(rows.length);
-        for (var i = 0; i < rows.length; i++) {
-        var cols = rows[i].f;
-        data[i] = new Array(cols.length);
-        for (var j = 0; j < cols.length; j++) {
-            data[i][j] = cols[j].v;
-        }
-        }
-        sheet.getRange(2, 1, rows.length, headers.length).setValues(data);
-
-        Logger.log('Results spreadsheet updated');
-    } else {
-        Logger.log('No rows returned.');
-    }
-}
+    Logger.log('Results spreadsheet updated');
+  } else {
+    Logger.log('No rows returned.');
+  }
+};
