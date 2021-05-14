@@ -32,7 +32,7 @@ const isProd = process.env.NODE_ENV === 'production';
 const destination = path.resolve(__dirname, 'dist');
 
 // define server paths
-const serverEntry = './src/server/index.js';
+const serverEntry = './src/server/index.ts';
 
 // define appsscript.json file path
 const copyAppscriptEntry = './appsscript.json';
@@ -44,7 +44,7 @@ const devDialogEntry = './dev/index.js';
 const clientEntrypoints = [
   {
     name: 'sidebar',
-    entry: './src/client/sidebar/index.js',
+    entry: './src/client/sidebar/index.tsx',
     filename: 'panel',
     template: './src/client/sidebar/index.html',
   },

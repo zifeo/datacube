@@ -1,6 +1,8 @@
 import * as publicUiFunctions from './ui';
 import * as publicBigQueryFunctions from './bigquery';
 
+declare var global;
+
 global.onOpen = publicUiFunctions.onOpen;
 global.openSidebar = publicUiFunctions.openSidebar;
 
@@ -13,4 +15,4 @@ global.TEST = publicBigQueryFunctions.TEST;
  * @return The input multiplied by 2.
  * @customfunction
  */
- global.DOUBLE = input => input * 2;
+global.DOUBLE = input => input * 2;

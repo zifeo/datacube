@@ -1,4 +1,6 @@
 
+declare var BigQuery;
+
 /**
  * Multiplies the input value by 2.
  *
