@@ -1,17 +1,15 @@
 declare var BigQuery;
 
-/**
- * Multiplies the input value by 2.
- *
- * @param {number} input The value to multiply.
- * @return The input multiplied by 2.
- * @customfunction
- */
-export const TEST = query => {
-  const projectId = '';
+export const listProjects = () => {
+  const projects = BigQuery.Projects.list();
+  Logger.log(projects);
+  return projects;
+};
 
+export const TEST = (projectId, query) => {
   const request = {
     query,
+    useLegacySql: false,
   };
   let queryResults = BigQuery.Jobs.query(request, projectId);
   const { jobId } = queryResults.jobReference;
@@ -36,25 +34,22 @@ export const TEST = query => {
   if (rows) {
     const sheet = SpreadsheetApp.getActiveSheet();
 
-    // Append the headers.
-    const headers = queryResults.schema.fields.map(field => {
-      return field.name;
-    });
-    sheet.appendRow(headers);
+    const data = new Array(rows.length + 1);
+    data[0] = queryResults.schema.fields.map(field => field.name);
 
-    // Append the results.
-    const data = new Array(rows.length);
     for (let i = 0; i < rows.length; i += 1) {
       const cols = rows[i].f;
-      data[i] = new Array(cols.length);
+      data[i + 1] = new Array(cols.length);
       for (let j = 0; j < cols.length; j += 1) {
-        data[i][j] = cols[j].v;
+        data[i + 1][j] = cols[j].v;
       }
     }
-    sheet.getRange(2, 1, rows.length, headers.length).setValues(data);
 
-    Logger.log('Results spreadsheet updated');
-  } else {
-    Logger.log('No rows returned.');
+    const currentRange = SpreadsheetApp.getActiveRange();
+    const [row, col] = currentRange
+      ? [currentRange.getRow(), currentRange.getColumn()]
+      : [1, 1];
+
+    sheet.getRange(row, col, rows.length + 1, data[0].length).setValues(data);
   }
 };
