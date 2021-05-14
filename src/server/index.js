@@ -1,12 +1,16 @@
 import * as publicUiFunctions from './ui';
-import * as publicSheetFunctions from './sheets';
+import * as publicBigQueryFunctions from './bigquery';
 
-// Expose public functions by attaching to `global`
 global.onOpen = publicUiFunctions.onOpen;
-global.openDialog = publicUiFunctions.openDialog;
-global.openDialogBootstrap = publicUiFunctions.openDialogBootstrap;
-global.openAboutSidebar = publicUiFunctions.openAboutSidebar;
-global.getSheetsData = publicSheetFunctions.getSheetsData;
-global.addSheet = publicSheetFunctions.addSheet;
-global.deleteSheet = publicSheetFunctions.deleteSheet;
-global.setActiveSheet = publicSheetFunctions.setActiveSheet;
+global.openSidebar = publicUiFunctions.openSidebar;
+
+global.TEST = publicBigQueryFunctions.TEST;
+
+/**
+ * Multiplies the input value by 2.
+ *
+ * @param {number} input The value to multiply.
+ * @return The input multiplied by 2.
+ * @customfunction
+ */
+ global.DOUBLE = input => input * 2;
