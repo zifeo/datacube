@@ -10,6 +10,8 @@ export const onOpen = () => {
 };
 
 export const openSidebar = () => {
-  const html = HtmlService.createHtmlOutputFromFile('panel');
+  const html = HtmlService.createHtmlOutputFromFile('panel').setTitle(
+    'DataCube Editor'
+  );
   SpreadsheetApp.getUi().showSidebar(html);
 };
