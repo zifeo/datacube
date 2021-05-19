@@ -6,9 +6,21 @@ export const listProjects = () => {
   return projects;
 };
 
-export const TEST = (projectId, query) => {
+export const listDatasets = projectId => {
+  const datasets = BigQuery.Datasets.list(projectId);
+  Logger.log(datasets);
+  return datasets;
+};
+
+export const listTables = (projectId, datasetId) => {
+  const tables = BigQuery.Tables.list(projectId, datasetId);
+  Logger.log(tables);
+  return tables;
+};
+
+export const query = (projectId, sql) => {
   const request = {
-    query,
+    query: sql,
     useLegacySql: false,
   };
   let queryResults = BigQuery.Jobs.query(request, projectId);

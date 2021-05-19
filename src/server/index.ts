@@ -6,5 +6,7 @@ declare var global;
 global.onOpen = publicUiFunctions.onOpen;
 global.openSidebar = publicUiFunctions.openSidebar;
 
-global.TEST = publicBigQueryFunctions.TEST;
+global.query = publicBigQueryFunctions.query;
 global.listProjects = publicBigQueryFunctions.listProjects;
+global.listDatasets = publicBigQueryFunctions.listDatasets;
+global.listTables = publicBigQueryFunctions.listTables;
