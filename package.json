@@ -22,9 +22,11 @@
   },
   "dependencies": {
     "@material-ui/core": "^4.11.4",
+    "codemirror": "^5.61.0",
     "gas-client": "^0.1.0",
     "prop-types": "^15.7.2",
     "react": "^16.13.1",
+    "react-codemirror2": "^7.2.1",
     "react-dom": "^16.13.1",
     "sql-formatter": "^4.0.2"
   },
