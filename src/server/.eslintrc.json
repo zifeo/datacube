@@ -1,8 +1,8 @@
 {
   "root": true,
-  "parser": "babel-eslint",
+  "parser": "@typescript-eslint/typescript-estree",
   "extends": ["airbnb-base", "plugin:prettier/recommended"],
-  "plugins": ["prettier", "googleappsscript"],
+  "plugins": ["prettier", "googleappsscript", "@typescript-eslint"],
   "env": {
     "googleappsscript/googleappsscript": true
   },

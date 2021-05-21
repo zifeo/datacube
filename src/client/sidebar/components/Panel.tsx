@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '@material-ui/core';
 import Select from '@material-ui/core/Select';
+import Grid from '@material-ui/core/Grid';
 import MenuItem from '@material-ui/core/MenuItem';
-import { format } from 'sql-formatter';
-import { Controlled as CodeMirror } from 'react-codemirror2';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Divider from '@material-ui/core/Divider';
+import { Editor } from './Editor';
 
 import server from '../../utils/server';
 import 'codemirror/mode/sql/sql';
@@ -12,12 +15,7 @@ import 'codemirror/addon/hint/sql-hint';
 
 const { serverFunctions } = server;
 
-const About = () => {
-  const [sql, setSQL] = useState(
-    format(
-      'SELECT id.id, createdAt FROM db ORDER BY createdAt DESC LIMIT 1'
-    )
-  );
+export const Panel = () => {
   const [projects, setProjects] = useState([]);
   const [completions, setCompletions] = useState({});
   const [project, setProject] = useState('');
@@ -53,63 +51,45 @@ const About = () => {
     })();
   }, []);
 
-  const onQuery = () => {
-    serverFunctions.query(project, sql);
-  };
-
-  const onFormat = () => {
-    setSQL(format(sql));
-  };
-
   return (
-    <div>
-      <Select onChange={changeProject} value={project}>
-        {projects.map(p => (
-          <MenuItem key={p.id} value={p.id}>
-            {p.friendlyName}
-          </MenuItem>
-        ))}
-      </Select>
-      <br />
-      <br />
-
-      <br />
-      <CodeMirror
-        value={sql}
-        options={{
-          mode: 'text/x-mysql',
-          hintOptions: {
-            tables: completions,
-            completeSingle: false,
-          },
-          extraKeys: {
-            Tab: editor => {
-              editor.replaceSelection('  ', 'end');
-            },
-            'Alt-F': onFormat,
-            'Shift-Enter': onQuery,
-          },
-        }}
-        onChange={(editor, data) => {
-          const { origin, text } = data;
-          const reg = /[a-z0-9]/i;
-          if (origin === '+input' && (reg.test(text) || text[0] === '.')) {
-            editor.showHint();
-          }
-        }}
-        onBeforeChange={(editor, data, value) => {
-          setSQL(value);
-        }}
-      />
-      <br />
-      <Button onClick={onQuery}>
-        Run<small>(⇧+⏎)</small>
-      </Button>
-      <Button onClick={onFormat}>
-        Format<small>(Alt+F)</small>
-      </Button>
-    </div>
+    <Grid container spacing={3}>
+      <Grid item xs={8}>
+        <Select
+          onChange={changeProject}
+          value={project}
+          style={{ width: '100%' }}
+        >
+          {projects.map(p => (
+            <MenuItem key={p.id} value={p.id}>
+              {p.friendlyName}
+            </MenuItem>
+          ))}
+        </Select>
+      </Grid>
+      <Grid item xs={4}>
+        Test
+      </Grid>
+      <Grid item xs={12}>
+        <Editor tables={completions} projectId={project} />
+      </Grid>
+      <Grid item xs={12}>
+        <List dense>
+          <ListItem button>
+            <ListItemText primary="Inbox" />
+          </ListItem>
+          <Divider />
+          <ListItem button divider>
+            <ListItemText primary="Drafts" />
+          </ListItem>
+          <ListItem button>
+            <ListItemText primary="Trash" />
+          </ListItem>
+          <Divider light />
+          <ListItem button>
+            <ListItemText primary="Spam" secondary="date" />
+          </ListItem>
+        </List>
+      </Grid>
+    </Grid>
   );
 };
-
-export default About;
