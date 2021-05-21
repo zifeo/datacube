@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "lib": [ "es2015", "DOM", "esnext" ],
-    "types": ["gas-types-detailed"],
+    "lib": ["es2015", "DOM", "esnext"],
+    "types": ["gas-types-detailed", "node"],
     "jsx": "react",
     "esModuleInterop": true
   }

@@ -1,5 +1,5 @@
-declare var SpreadsheetApp;
-declare var HtmlService;
+declare let SpreadsheetApp;
+declare let HtmlService;
 
 export const onOpen = () => {
   const menu = SpreadsheetApp.getUi()

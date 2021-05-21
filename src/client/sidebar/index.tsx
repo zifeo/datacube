@@ -1,7 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Panel from './components/Panel';
+import { RecoilRoot } from 'recoil';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import { Panel } from './components/Panel';
 
-import './styles.css';
+const App = () => (
+  <RecoilRoot>
+    <CssBaseline />
+    <Panel />
+  </RecoilRoot>
+);
 
-ReactDOM.render(<Panel />, document.getElementById('index'));
+ReactDOM.render(<App />, document.getElementById('index'));

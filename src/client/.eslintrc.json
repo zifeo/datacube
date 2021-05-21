@@ -1,12 +1,12 @@
 {
   "root": true,
-  "parser": "babel-eslint",
+  "parser": "@typescript-eslint/typescript-estree",
   "extends": [
     "airbnb-base",
     "plugin:prettier/recommended",
     "plugin:react/recommended"
   ],
-  "plugins": ["babel", "react", "prettier"],
+  "plugins": ["react", "prettier", "@typescript-eslint"],
   "env": {
     "browser": true,
     "es6": true
