@@ -3,8 +3,8 @@ declare var HtmlService;
 
 export const onOpen = () => {
   const menu = SpreadsheetApp.getUi()
-    .createMenu('DataCube')
-    .addItem('BigQuery Editor', 'openSidebar');
+    .createMenu('BigQuery')
+    .addItem('Editor', 'openSidebar');
 
   menu.addToUi();
 };
