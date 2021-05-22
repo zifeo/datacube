@@ -4,6 +4,8 @@ import { RecoilRoot } from 'recoil';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { Panel } from './components/Panel';
 
+import "./styles.css"
+
 const App = () => (
   <RecoilRoot>
     <CssBaseline />
