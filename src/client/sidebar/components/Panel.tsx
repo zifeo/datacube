@@ -6,6 +6,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
+import { makeStyles } from '@material-ui/core/styles';
 import { Editor } from './Editor';
 
 import server from '../../utils/server';
@@ -15,7 +16,15 @@ import 'codemirror/addon/hint/sql-hint';
 
 const { serverFunctions } = server;
 
+const useStyles = makeStyles({
+  select: {
+    margin: '10px 50px 15px 50px',
+    width: 200,
+  },
+});
+
 export const Panel = () => {
+  const classes = useStyles();
   const [projects, setProjects] = useState([]);
   const [completions, setCompletions] = useState({});
   const [project, setProject] = useState('');
@@ -52,12 +61,12 @@ export const Panel = () => {
   }, []);
 
   return (
-    <Grid container spacing={3}>
-      <Grid item xs={8}>
+    <Grid container>
+      <Grid item xs={12}>
         <Select
           onChange={changeProject}
           value={project}
-          style={{ width: '100%' }}
+          className={classes.select}
         >
           {projects.map(p => (
             <MenuItem key={p.id} value={p.id}>
@@ -65,9 +74,6 @@ export const Panel = () => {
             </MenuItem>
           ))}
         </Select>
-      </Grid>
-      <Grid item xs={4}>
-        Test
       </Grid>
       <Grid item xs={12}>
         <Editor tables={completions} projectId={project} />
@@ -77,10 +83,11 @@ export const Panel = () => {
           <ListItem button>
             <ListItemText primary="Inbox" />
           </ListItem>
-          <Divider />
-          <ListItem button divider>
+          <Divider light />
+          <ListItem button>
             <ListItemText primary="Drafts" />
           </ListItem>
+          <Divider light />
           <ListItem button>
             <ListItemText primary="Trash" />
           </ListItem>
