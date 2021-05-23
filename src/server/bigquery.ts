@@ -1,7 +1,6 @@
 declare let BigQuery;
 declare let Utilities;
 declare let SpreadsheetApp;
-declare let PropertiesService;
 
 export const listProjects = () => {
   return BigQuery.Projects.list();
@@ -21,18 +20,6 @@ export const getTable = (
   tableId: string
 ) => {
   return BigQuery.Tables.list(projectId, datasetId, tableId);
-};
-
-export const set = (key: string, value: any) => {
-  PropertiesService.getDocumentProperties().setProperty(key, value);
-};
-
-export const get = (key: string) => {
-  return PropertiesService.getDocumentProperties().getProperty(key);
-};
-
-export const clean = () => {
-  PropertiesService.getDocumentProperties().deleteAllProperties();
 };
 
 export const query = (projectId: string, sql: string, dryRun: boolean) => {

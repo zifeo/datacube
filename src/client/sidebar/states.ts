@@ -1,7 +1,30 @@
-import { atom } from 'recoil';
+import { atom, DefaultValue } from 'recoil';
 import { format } from 'sql-formatter';
+import server from '../utils/server';
+
+const { serverFunctions } = server;
 
 const isProduction = process.env.NODE_ENV === 'production';
+
+const persistence =
+  (key) =>
+  ({ setSelf, onSet }) => {
+    (async () => {
+      const value = await serverFunctions.get(key);
+      if (value !== null) {
+        setSelf(JSON.parse(value));
+      }
+    })();
+
+    onSet((newValue) => {
+      if (newValue instanceof DefaultValue) {
+        serverFunctions.removeItem(key);
+      } else {
+        console.log(newValue);
+        serverFunctions.set(key, JSON.stringify(newValue));
+      }
+    });
+  };
 
 const sql = atom({
   key: 'sql',
@@ -27,9 +50,22 @@ const completions = atom({
   default: {},
 });
 
+const queries = atom({
+  key: 'queries',
+  default: {},
+  effects_UNSTABLE: [persistence('queries')],
+});
+
+const queryId = atom({
+  key: 'queryId',
+  default: null,
+});
+
 export const states = {
   project,
   projects,
   completions,
   sql,
+  queries,
+  queryId
 };
