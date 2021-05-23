@@ -78,7 +78,7 @@ export const ProjectSelector = () => {
 
   const changeProject = async (event: React.ChangeEvent<{ value: any }>) => {
     setLoading(true);
-    const selectedProject = projects.find((p) => p.id === event.target.value);
+    const selectedProject = projects.find((p) => p.project.projectReference.projectId === event.target.value);
     const completions = await fetchCompletions(selectedProject);
 
     console.log(selectedProject);

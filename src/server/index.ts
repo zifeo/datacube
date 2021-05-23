@@ -1,4 +1,5 @@
 import * as publicBigQueryFunctions from './bigquery';
+import * as publicStorageFunctions from './storage';
 import * as publicUiFunctions from './ui';
 
 declare let global;
@@ -11,6 +12,7 @@ global.listProjects = publicBigQueryFunctions.listProjects;
 global.listDatasets = publicBigQueryFunctions.listDatasets;
 global.listTables = publicBigQueryFunctions.listTables;
 global.getTable = publicBigQueryFunctions.getTable;
-global.get = publicBigQueryFunctions.get;
-global.set = publicBigQueryFunctions.set;
-global.clean = publicBigQueryFunctions.clean;
+global.get = publicStorageFunctions.get;
+global.set = publicStorageFunctions.set;
+global.clear = publicStorageFunctions.clear;
+global.remove = publicStorageFunctions.remove;

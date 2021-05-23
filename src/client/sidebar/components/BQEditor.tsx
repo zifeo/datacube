@@ -26,6 +26,10 @@ const useStyles = makeStyles({
   },
 });
 
+function createQueryId() {
+  return Math.floor(Math.random() * 1_000_000);
+}
+
 export const BQEditor = () => {
   const classes = useStyles();
 
@@ -36,12 +40,15 @@ export const BQEditor = () => {
   const [loading, setLoading] = useState(false);
   const [info, setInfo] = useState('Select a project or a query');
 
-  useEffect(() => {
-    (async () => {
-      // const res = await serverFunctions.listProjects<any>(50);
-    })();
-  }, []);
+  const [queries, setQueries] = useRecoilState(states.queries);
+  const [queryId, setQueryId] = useRecoilState(states.queryId);
 
+  useEffect(() => {
+    if (!queryId) {
+      setQueryId(createQueryId())
+    }
+  }, [setQueryId]);
+  
   const onQuery = async () => {
     setLoading(true);
 
@@ -59,7 +66,8 @@ export const BQEditor = () => {
         `${totalRows} row${totalRows > 1 ? 's' : ''} from ${
           cacheHit ? 'cache' : prettyBytes(1 * totalBytesProcessed)
         }`
-      );
+        );
+      setQueries({...queries, [queryId]: {projectId: project.projectReference.projectId, sql}})
     }
 
     setLoading(false);
@@ -69,7 +77,9 @@ export const BQEditor = () => {
     setSQL(format(sql));
   };
 
-  const onNew = () => {};
+  const onNew = () => {
+    setQueryId(createQueryId())
+  };
 
   const onClose = () => {
     setInfo('');
