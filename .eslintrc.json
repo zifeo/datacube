@@ -1,0 +1,48 @@
+{
+  "parser": "@typescript-eslint/typescript-estree",
+  "extends": [
+    "airbnb-base",
+    "plugin:prettier/recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended"
+  ],
+  "plugins": [
+    "react", 
+    "react-hooks", 
+    "prettier", 
+    "googleappsscript", 
+    "@typescript-eslint"
+  ],
+  "env": {
+    "browser": true,
+    "googleappsscript/googleappsscript": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 9,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "rules": {
+    "prettier/prettier": "error",
+    "no-undef": "off",
+    "import/prefer-default-export": "off",
+    "import/extensions": "off",
+    "react-hooks/exhaustive-deps": [
+      "warn", {
+        "additionalHooks": "useRecoilCallback"
+      }
+    ]
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    },
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    }
+  }
+}

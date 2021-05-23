@@ -10,8 +10,7 @@ export const onOpen = () => {
 };
 
 export const openSidebar = () => {
-  const html = HtmlService.createHtmlOutputFromFile('panel').setTitle(
-    'BigQuery Editor'
-  );
+  const html =
+    HtmlService.createHtmlOutputFromFile('panel').setTitle('BigQuery Editor');
   SpreadsheetApp.getUi().showSidebar(html);
 };
