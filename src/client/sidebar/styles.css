@@ -1,0 +1,14 @@
+#index .CodeMirror {
+    background: none;
+    height: auto;
+    min-height: 300px;
+    font-size: 0.75rem;
+}
+
+#index .CodeMirror pre {
+    word-break: break-all;
+}
+
+.MuiSnackbarContent-message {
+    font-size: 0.8rem;
+}

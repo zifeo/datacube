@@ -1,5 +1,5 @@
-import * as publicUiFunctions from './ui';
 import * as publicBigQueryFunctions from './bigquery';
+import * as publicUiFunctions from './ui';
 
 declare let global;
 

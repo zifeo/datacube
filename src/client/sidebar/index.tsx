@@ -1,15 +1,14 @@
+import CssBaseline from '@material-ui/core/CssBaseline';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { RecoilRoot } from 'recoil';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import { Panel } from './components/Panel';
-
-import "./styles.css"
+import { BQEditor } from './components/BQEditor';
+import './styles.css';
 
 const App = () => (
   <RecoilRoot>
     <CssBaseline />
-    <Panel />
+    <BQEditor />
   </RecoilRoot>
 );
 
