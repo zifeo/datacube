@@ -3,7 +3,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
 import { makeStyles } from '@material-ui/core/styles';
 import React, { useEffect, useState } from 'react';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import { useRecoilState } from 'recoil';
 import server from '../../utils/server';
 import { states } from '../states';
 
@@ -32,12 +32,14 @@ async function fetchProjects() {
     return datasets ? { ...project, datasets } : null;
   });
   const projectsWithDatasets = await Promise.all(fetchDatasets);
-  const bqProjects = projectsWithDatasets.filter((p) => p);
-  return bqProjects;
+  return projectsWithDatasets.filter((p) => p);
 }
 
 async function fetchCompletions(project) {
-  const fetchTables = project.datasets.map((dataset) =>
+  const { datasets } = await serverFunctions.listDatasets(
+    project.projectReference.projectId
+  );
+  const fetchTables = datasets.map((dataset) =>
     serverFunctions
       .listTables(
         project.projectReference.projectId,
@@ -45,7 +47,6 @@ async function fetchCompletions(project) {
       )
       .then((r) => r.tables || null)
   );
-
   const tables = await Promise.all(fetchTables);
   return Object.fromEntries(
     tables
@@ -62,7 +63,7 @@ export const ProjectSelector = () => {
   const classes = useStyles();
   const [project, setProject] = useRecoilState(states.project);
   const [projects, setProjects] = useRecoilState(states.projects);
-  const setCompletions = useSetRecoilState(states.completions);
+  const [completions, setCompletions] = useRecoilState(states.completions);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -73,15 +74,22 @@ export const ProjectSelector = () => {
     });
   }, [setProjects]);
 
+  useEffect(() => {
+    (async () => {
+      if (Object.keys(completions).length === 0 && project && project !== '') {
+        const compls = await fetchCompletions(project);
+        setCompletions(compls);
+      }
+    })();
+  }, [completions, setCompletions, project]);
+
   const changeProject = async (event: React.ChangeEvent<{ value: any }>) => {
     setLoading(true);
+    setCompletions({});
     const selectedProject = projects.find(
       (p) => p.projectReference.projectId === event.target.value
     );
-    const completions = await fetchCompletions(selectedProject);
-
     setProject(selectedProject);
-    setCompletions(completions);
     setLoading(false);
   };
 

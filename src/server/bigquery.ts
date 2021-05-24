@@ -19,7 +19,7 @@ export const getTable = (
   datasetId: string,
   tableId: string
 ) => {
-  return BigQuery.Tables.list(projectId, datasetId, tableId);
+  return BigQuery.Tables.get(projectId, datasetId, tableId);
 };
 
 export const query = (projectId: string, sql: string, dryRun: boolean) => {

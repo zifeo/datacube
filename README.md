@@ -15,3 +15,9 @@ npm run lint
 ```
 
 Based on https://github.com/enuchi/React-Google-Apps-Script.
+
+## Deploy
+
+```
+npm run deploy
+```

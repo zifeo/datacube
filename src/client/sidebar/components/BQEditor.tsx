@@ -8,6 +8,7 @@ import prettyBytes from 'pretty-bytes';
 import React, { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 import { format } from 'sql-formatter';
+import { useDebouncedCallback } from 'use-debounce';
 import server from '../../utils/server';
 import { states } from '../states';
 import { Actions } from './Actions';
@@ -44,14 +45,32 @@ export const BQEditor = () => {
   const classes = useStyles();
 
   const [project] = useRecoilState(states.project);
-  const [tables] = useRecoilState(states.completions);
-
-  const [sql, setSQL] = useRecoilState(states.sql);
+  const [tables, setTables] = useRecoilState<Record<string, Array<string>>>(
+    states.completions
+  );
+  const [sql, setSQL] = useRecoilState<string>(states.sql);
   const [loading, setLoading] = useState(false);
   const [info, setInfo] = useState('Select a project or a query');
 
   const [queries, setQueries] = useRecoilState(states.queries);
   const [queryId, setQueryId] = useRecoilState(states.queryId);
+
+  const checkCompletions = useDebouncedCallback(async () => {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const [word, cols] of Object.entries(tables)) {
+      if (cols.length === 0 && sql.includes(word)) {
+        const [dataset, table] = word.split('.');
+        // eslint-disable-next-line no-await-in-loop
+        const { schema } = await serverFunctions.getTable(
+          project.projectReference.projectId,
+          dataset,
+          table
+        );
+        const columns = schema.fields.map((f) => f.name);
+        setTables({ ...tables, [word]: columns });
+      }
+    }
+  }, 500);
 
   useEffect(() => {
     if (!queryId) {
@@ -95,6 +114,11 @@ export const BQEditor = () => {
     setSQL('');
   };
 
+  const onChange = async (text: string) => {
+    setSQL(text);
+    checkCompletions();
+  };
+
   const onClose = () => {
     setInfo('');
   };
@@ -117,10 +141,11 @@ export const BQEditor = () => {
           sql={sql}
           tables={tables}
           keys={{
-            'Alt-F': onFormat,
+            'Ctrl-C': onFormat,
+            'Ctrl-N': onNew,
             'Shift-Enter': onQuery,
           }}
-          onChange={setSQL}
+          onChange={onChange}
         />
       </Grid>
       <Grid item xs={12} className={classes.footer}>

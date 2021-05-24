@@ -16,7 +16,7 @@ export const CodeMirror = ({ sql, tables, onChange, keys }: Props) => {
     <Controlled
       value={sql}
       options={{
-        mode: 'text/x-mysql',
+        mode: 'text/x-sql',
         hintOptions: {
           tables,
           completeSingle: false,
@@ -26,6 +26,7 @@ export const CodeMirror = ({ sql, tables, onChange, keys }: Props) => {
           Tab: (editor) => {
             editor.replaceSelection('  ', 'end');
           },
+          'Ctrl-Space': 'autocomplete',
           ...keys,
         },
       }}
