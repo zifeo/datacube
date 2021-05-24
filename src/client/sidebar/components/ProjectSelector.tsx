@@ -33,7 +33,6 @@ async function fetchProjects() {
   });
   const projectsWithDatasets = await Promise.all(fetchDatasets);
   const bqProjects = projectsWithDatasets.filter((p) => p);
-  console.log(bqProjects);
   return bqProjects;
 }
 
@@ -48,7 +47,7 @@ async function fetchCompletions(project) {
   );
 
   const tables = await Promise.all(fetchTables);
-  const completions = Object.fromEntries(
+  return Object.fromEntries(
     tables
       .flat()
       .filter((t) => t)
@@ -57,8 +56,6 @@ async function fetchCompletions(project) {
         [],
       ])
   );
-  console.log(completions);
-  return completions;
 }
 
 export const ProjectSelector = () => {
@@ -78,10 +75,11 @@ export const ProjectSelector = () => {
 
   const changeProject = async (event: React.ChangeEvent<{ value: any }>) => {
     setLoading(true);
-    const selectedProject = projects.find((p) => p.project.projectReference.projectId === event.target.value);
+    const selectedProject = projects.find(
+      (p) => p.projectReference.projectId === event.target.value
+    );
     const completions = await fetchCompletions(selectedProject);
 
-    console.log(selectedProject);
     setProject(selectedProject);
     setCompletions(completions);
     setLoading(false);
@@ -92,17 +90,21 @@ export const ProjectSelector = () => {
       <Select
         variant="outlined"
         onChange={changeProject}
-        value={project && project.projectReference.projectId}
+        value={project ? project.projectReference.projectId : ''}
         className={classes.select}
         disabled={loading}
         displayEmpty={true}
-        renderValue={(v) =>
-          loading ? (
-            <CircularProgress size={18} />
-          ) : (
-            v || `${projects.length} projects`
-          )
-        }
+        renderValue={(v) => {
+          if (loading) {
+            return <CircularProgress size={18} />;
+          }
+
+          if (v === '') {
+            return `${projects.length} projects`;
+          }
+
+          return v;
+        }}
       >
         {projects.map((p) => (
           <MenuItem
