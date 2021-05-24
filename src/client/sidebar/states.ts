@@ -20,7 +20,6 @@ const persistence =
       if (newValue instanceof DefaultValue) {
         serverFunctions.removeItem(key);
       } else {
-        console.log(newValue);
         serverFunctions.set(key, JSON.stringify(newValue));
       }
     });
@@ -67,5 +66,5 @@ export const states = {
   completions,
   sql,
   queries,
-  queryId
+  queryId,
 };

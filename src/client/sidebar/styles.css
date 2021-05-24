@@ -1,7 +1,10 @@
+html, body, #index, #index > div, .react-codemirror2 {
+    height: 100%;
+}
+
 #index .CodeMirror {
     background: none;
-    height: auto;
-    min-height: 300px;
+    height: 100%;
     font-size: 0.75rem;
 }
 

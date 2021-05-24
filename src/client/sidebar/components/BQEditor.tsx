@@ -24,10 +24,20 @@ const useStyles = makeStyles({
   alert: {
     fontSize: '0.9rem',
   },
+  header: {
+    height: 40,
+  },
+  main: {
+    height: 'calc(100% - 40px - 300px)',
+  },
+  footer: {
+    height: 300,
+    overflowY: 'scroll',
+  },
 });
 
 function createQueryId() {
-  return Math.floor(Math.random() * 1_000_000);
+  return new Date().toISOString();
 }
 
 export const BQEditor = () => {
@@ -45,10 +55,10 @@ export const BQEditor = () => {
 
   useEffect(() => {
     if (!queryId) {
-      setQueryId(createQueryId())
+      setQueryId(createQueryId());
     }
-  }, [setQueryId]);
-  
+  }, [queryId, setQueryId]);
+
   const onQuery = async () => {
     setLoading(true);
 
@@ -66,8 +76,11 @@ export const BQEditor = () => {
         `${totalRows} row${totalRows > 1 ? 's' : ''} from ${
           cacheHit ? 'cache' : prettyBytes(1 * totalBytesProcessed)
         }`
-        );
-      setQueries({...queries, [queryId]: {projectId: project.projectReference.projectId, sql}})
+      );
+      setQueries({
+        ...queries,
+        [queryId]: { projectId: project.projectReference.projectId, sql },
+      });
     }
 
     setLoading(false);
@@ -78,7 +91,8 @@ export const BQEditor = () => {
   };
 
   const onNew = () => {
-    setQueryId(createQueryId())
+    setQueryId(createQueryId());
+    setSQL('');
   };
 
   const onClose = () => {
@@ -87,10 +101,10 @@ export const BQEditor = () => {
 
   return (
     <Grid container>
-      <Grid item xs={6}>
+      <Grid item xs={6} className={classes.header}>
         <ProjectSelector />
       </Grid>
-      <Grid item xs={6}>
+      <Grid item xs={6} className={classes.header}>
         <Actions
           onQuery={onQuery}
           onNew={onNew}
@@ -98,7 +112,7 @@ export const BQEditor = () => {
           loading={loading}
         />
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={12} className={classes.main}>
         <CodeMirror
           sql={sql}
           tables={tables}
@@ -109,7 +123,7 @@ export const BQEditor = () => {
           onChange={setSQL}
         />
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={12} className={classes.footer}>
         <History />
         <Snackbar
           open={info !== ''}

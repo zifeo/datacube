@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@material-ui/core": "^4.11.4",
+    "@material-ui/icons": "^4.11.2",
     "codemirror": "^5.61.0",
     "eslint-plugin-react-hooks": "^4.2.0",
     "gas-client": "^0.1.0",
