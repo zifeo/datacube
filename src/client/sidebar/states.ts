@@ -30,7 +30,7 @@ const sql = atom({
   default: isProduction
     ? ''
     : format(
-        'SELECT c.vaccine, c.geoRegion, c.entries FROM `datacube-327418.demo.covid19-ch` as c ORDER BY c.date DESC LIMIT 3'
+        "SELECT c.vaccine, c.geoRegion, c.entries FROM 'datacube-327418.demo.covid19_ch' as c ORDER BY c.date DESC LIMIT 3"
       ),
 });
 

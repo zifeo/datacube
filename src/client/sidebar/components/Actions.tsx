@@ -33,10 +33,10 @@ export const Actions = ({ onQuery, onFormat, onNew, loading }: Props) => {
             {loading ? <CircularProgress size={20} /> : 'Run'}
           </Button>
         </Tooltip>
-        <Tooltip title="Alt+F">
+        <Tooltip title="Ctrl+M">
           <Button onClick={onFormat}>Fmt</Button>
         </Tooltip>
-        <Tooltip title="Alt+N">
+        <Tooltip title="Ctrl+N">
           <Button onClick={onNew}>New</Button>
         </Tooltip>
       </ButtonGroup>

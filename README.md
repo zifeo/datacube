@@ -5,7 +5,7 @@
 
 remove unused lib
 tune dynamic loader
-clear script id
+
 
 
 ## Development
@@ -25,7 +25,7 @@ Setup https for local development & react hot-reload.
 ```
 brew install mkcert
 mkcert -install
-mkdirp -p certs
+mkdir -p certs
 mkcert -key-file ./certs/key.pem -cert-file ./certs/cert.pem localhost 127.0.0.1
 ```
 
@@ -35,6 +35,8 @@ And it should be ready to access on your newly created sheet (you may need to re
 yarn start
 yarn lint
 ```
+
+On client code change, the dev iframe should reload itself in the sheet whereas on the server side a manual repush is needed.
 
 ### Deploy
 

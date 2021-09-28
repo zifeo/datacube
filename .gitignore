@@ -27,3 +27,4 @@ gifs/
 !.yarn/cache
 
 .clasp.json
+yarn-error.log

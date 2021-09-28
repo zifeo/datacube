@@ -141,7 +141,7 @@ export const BQEditor = () => {
           sql={sql}
           tables={tables}
           keys={{
-            'Ctrl-C': onFormat,
+            'Ctrl-M': onFormat,
             'Ctrl-N': onNew,
             'Shift-Enter': onQuery,
           }}

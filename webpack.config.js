@@ -5,9 +5,6 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const GasPlugin = require('gas-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const HtmlWebpackInlineSourcePlugin = require('@effortlessmotion/html-webpack-inline-source-plugin');
-const DynamicCdnWebpackPlugin = require('@effortlessmotion/dynamic-cdn-webpack-plugin');
-const moduleToCdn = require('module-to-cdn');
 
 const dotenv = require('dotenv').config();
 
@@ -19,7 +16,8 @@ envVars.PORT = PORT;
 const isProd = process.env.NODE_ENV === 'production';
 
 // our destination directory
-const destination = path.resolve(__dirname, 'dist');
+const context = __dirname;
+const destination = path.resolve(context, 'dist');
 
 // define server paths
 const serverEntry = './src/server/index.ts';
@@ -46,7 +44,7 @@ const keyPath = path.resolve(__dirname, './certs/key.pem');
 const certPath = path.resolve(__dirname, './certs/cert.pem');
 
 const copyFilesConfig = {
-  name: 'COPY FILES - appsscript.json',
+  name: 'copy appsscript.json',
   mode: 'production', // unnecessary for this config, but removes console warning
   entry: copyAppscriptEntry,
   output: {
@@ -65,7 +63,7 @@ const copyFilesConfig = {
 };
 
 const clientConfig = {
-  context: __dirname,
+  context,
   mode: isProd ? 'production' : 'development',
   output: {
     path: destination,
@@ -104,49 +102,49 @@ const clientConfig = {
   },
 };
 
-const dynamicCdnWebpackPluginConfig = {
-  // set "verbose" to true to print console logs on CDN usage while webpack builds
-  verbose: false,
-  resolver: (packageName, packageVersion, options) => {
-    const moduleDetails = moduleToCdn(packageName, packageVersion, options);
-    if (moduleDetails) {
-      return moduleDetails;
+// imported from https://github.com/facebook/create-react-app/blob/main/packages/react-dev-utils/InlineChunkHtmlPlugin.js
+// modified to handle the hash appended to the file main.js?459654645
+class InlineChunkHtmlPlugin {
+  constructor(htmlWebpackPlugin, tests) {
+    this.htmlWebpackPlugin = htmlWebpackPlugin;
+    this.tests = tests;
+  }
+
+  getInlinedTag(publicPath, assets, tag) {
+    if (tag.tagName !== 'script' || !(tag.attributes && tag.attributes.src)) {
+      return tag;
     }
-    // "name" should match the package being imported
-    // "var" is important to get right -- this should be the exposed global. Look up "webpack externals" for info.
-    switch (packageName) {
-      case '@material-ui/core':
-        return {
-          name: packageName,
-          var: 'MaterialUI',
-          version: packageVersion,
-          url: `https://unpkg.com/@material-ui/core@${packageVersion}/umd/material-ui.${
-            isProd ? 'production.min' : 'development'
-          }.js`,
-        };
-      case 'react':
-        return {
-          name: packageName,
-          var: 'React',
-          version: packageVersion,
-          url: `https://unpkg.com/react@${packageVersion}/umd/react.${
-            isProd ? 'production.min' : 'development'
-          }.js`,
-        };
-      case 'react-dom':
-        return {
-          name: packageName,
-          var: 'ReactDOM',
-          version: packageVersion,
-          url: `https://unpkg.com/react-dom@${packageVersion}/umd/react-dom.${
-            isProd ? 'production.min' : 'development'
-          }.js`,
-        };
-      default:
-        return null;
+    const scriptName = publicPath
+      ? tag.attributes.src.replace(publicPath, '')
+      : tag.attributes.src;
+    if (!this.tests.some((test) => scriptName.match(test))) {
+      return tag;
     }
-  },
-};
+    const asset = assets[scriptName.split('?')[0]];
+    if (asset == null) {
+      return tag;
+    }
+    return { tagName: 'script', innerHTML: asset.source(), closeTag: true };
+  }
+
+  apply(compiler) {
+    let publicPath = compiler.options.output.publicPath || '';
+    if (publicPath && !publicPath.endsWith('/')) {
+      publicPath += '/';
+    }
+
+    compiler.hooks.compilation.tap('InlineChunkHtmlPlugin', (compilation) => {
+      const tagFunction = (tag) =>
+        this.getInlinedTag(publicPath, compilation.assets, tag);
+
+      const hooks = this.htmlWebpackPlugin.getHooks(compilation);
+      hooks.alterAssetTagGroups.tap('InlineChunkHtmlPlugin', (assets) => {
+        assets.headTags = assets.headTags.map(tagFunction);
+        assets.bodyTags = assets.bodyTags.map(tagFunction);
+      });
+    });
+  }
+}
 
 const clientConfigs = clientEntrypoints.map((clientEntrypoint) => {
   return {
@@ -160,14 +158,14 @@ const clientConfigs = clientEntrypoints.map((clientEntrypoint) => {
       new HtmlWebpackPlugin({
         template: clientEntrypoint.template,
         scriptLoading: 'blocking',
+        publicPath: 'auto',
+        hash: true,
         filename: `${clientEntrypoint.filename}${isProd ? '' : '-impl'}.html`,
-        inlineSource: '^[^(//)]+.(js|css)$', // embed all js and css inline, exclude packages with '//' for dynamic cdn insertion
+        inlineSource: '^[^(//)]+.(js|css).*$', // embed all js and css inline, exclude packages with '//' for dynamic cdn insertion
       }),
-      // new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/main.js/]),
-      // new HtmlInlineScriptPlugin([/^[^(//)]+.(js|css)$/]),
-      // add the generated js code to the html file inline
-      new HtmlWebpackInlineSourcePlugin(),
-      // new DynamicCdnWebpackPlugin(dynamicCdnWebpackPluginConfig),
+      new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [
+        new RegExp('^[^(//)]+.(js|css).+$'),
+      ]),
     ],
   };
 });
@@ -178,6 +176,8 @@ const gasWebpackDevServerPath = require.resolve(
 
 const devServer = {
   port: PORT,
+  contentBase: destination,
+  writeToDisk: true,
   before: (app) => {
     // this '/gas/' path needs to match the path loaded in the iframe in dev/index.js
     app.get('/gas/*', (req, res) => {
@@ -200,7 +200,7 @@ const devClientConfigs = clientEntrypoints.map((clientEntrypoint) => {
   envVars.FILENAME = clientEntrypoint.filename;
   return {
     ...clientConfig,
-    name: `DEVELOPMENT: ${clientEntrypoint.name}`,
+    name: `development: ${clientEntrypoint.name}`,
     entry: devDialogEntry,
     plugins: [
       new webpack.DefinePlugin({
@@ -209,21 +209,21 @@ const devClientConfigs = clientEntrypoints.map((clientEntrypoint) => {
       new HtmlWebpackPlugin({
         template: './dev/index.html',
         scriptLoading: 'blocking',
+        publicPath: 'auto',
+        hash: true,
         // this should match the html files we load in src/server/ui.js
         filename: `${clientEntrypoint.filename}.html`,
-        inlineSource: '^[^(//)]+.(js|css)$', // embed all js and css inline, exclude packages with '//' for dynamic cdn insertion
       }),
-      // new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/main/]),
-      // new HtmlInlineScriptPlugin([/^[^(//)]+.(js|css)$/]),
-      new HtmlWebpackInlineSourcePlugin(),
-      // new DynamicCdnWebpackPlugin({}),
+      new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [
+        new RegExp('^[^(//)]+.(js|css).*$'),
+      ]),
     ],
   };
 });
 
 // webpack settings used by the server-side code
 const serverConfig = {
-  context: __dirname,
+  context,
   name: 'SERVER',
   // server config can't use 'development' mode
   // https://github.com/fossamagna/gas-webpack-plugin/issues/135
