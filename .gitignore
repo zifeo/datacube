@@ -25,3 +25,5 @@ gifs/
 !.yarn/versions
 
 !.yarn/cache
+
+.clasp.json
