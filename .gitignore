@@ -17,3 +17,11 @@ dist/
 
 .vscode
 gifs/
+
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+
+!.yarn/cache

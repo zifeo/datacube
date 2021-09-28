@@ -1,6 +1,3 @@
-/*********************************
- *    import webpack plugins
- ********************************/
 const path = require('path');
 const fs = require('fs');
 const webpack = require('webpack');
@@ -8,13 +5,10 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const GasPlugin = require('gas-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
-const DynamicCdnWebpackPlugin = require('dynamic-cdn-webpack-plugin');
+const HtmlWebpackInlineSourcePlugin = require('@effortlessmotion/html-webpack-inline-source-plugin');
+const DynamicCdnWebpackPlugin = require('@effortlessmotion/dynamic-cdn-webpack-plugin');
 const moduleToCdn = require('module-to-cdn');
 
-/*********************************
- *    set up environment variables
- ********************************/
 const dotenv = require('dotenv').config();
 
 const parsed = dotenv.error ? {} : dotenv.parsed;
@@ -22,12 +16,8 @@ const envVars = parsed || {};
 const PORT = envVars.PORT || 3000;
 envVars.NODE_ENV = process.env.NODE_ENV;
 envVars.PORT = PORT;
-
 const isProd = process.env.NODE_ENV === 'production';
 
-/*********************************
- *    define entrypoints
- ********************************/
 // our destination directory
 const destination = path.resolve(__dirname, 'dist');
 
@@ -55,11 +45,6 @@ const clientEntrypoints = [
 const keyPath = path.resolve(__dirname, './certs/key.pem');
 const certPath = path.resolve(__dirname, './certs/cert.pem');
 
-/*********************************
- *    Declare settings
- ********************************/
-
-// webpack settings for copying files to the destination folder
 const copyFilesConfig = {
   name: 'COPY FILES - appsscript.json',
   mode: 'production', // unnecessary for this config, but removes console warning
@@ -79,14 +64,8 @@ const copyFilesConfig = {
   ],
 };
 
-// webpack settings used by both client and server
-const sharedClientAndServerConfig = {
-  context: __dirname,
-};
-
-// webpack settings used by all client entrypoints
 const clientConfig = {
-  ...sharedClientAndServerConfig,
+  context: __dirname,
   mode: isProd ? 'production' : 'development',
   output: {
     path: destination,
@@ -125,10 +104,7 @@ const clientConfig = {
   },
 };
 
-// DynamicCdnWebpackPlugin settings
-// these settings help us load 'react', 'react-dom' and the packages defined below from a CDN
-// see https://github.com/enuchi/React-Google-Apps-Script#adding-new-libraries-and-packages
-const DynamicCdnWebpackPluginConfig = {
+const dynamicCdnWebpackPluginConfig = {
   // set "verbose" to true to print console logs on CDN usage while webpack builds
   verbose: false,
   resolver: (packageName, packageVersion, options) => {
@@ -144,7 +120,27 @@ const DynamicCdnWebpackPluginConfig = {
           name: packageName,
           var: 'MaterialUI',
           version: packageVersion,
-          url: `https://unpkg.com/@material-ui/core@${packageVersion}/umd/material-ui.${isProd ? 'production.min': 'development'}.js`,
+          url: `https://unpkg.com/@material-ui/core@${packageVersion}/umd/material-ui.${
+            isProd ? 'production.min' : 'development'
+          }.js`,
+        };
+      case 'react':
+        return {
+          name: packageName,
+          var: 'React',
+          version: packageVersion,
+          url: `https://unpkg.com/react@${packageVersion}/umd/react.${
+            isProd ? 'production.min' : 'development'
+          }.js`,
+        };
+      case 'react-dom':
+        return {
+          name: packageName,
+          var: 'ReactDOM',
+          version: packageVersion,
+          url: `https://unpkg.com/react-dom@${packageVersion}/umd/react-dom.${
+            isProd ? 'production.min' : 'development'
+          }.js`,
         };
       default:
         return null;
@@ -152,8 +148,7 @@ const DynamicCdnWebpackPluginConfig = {
   },
 };
 
-// webpack settings used by each client entrypoint defined at top
-const clientConfigs = clientEntrypoints.map(clientEntrypoint => {
+const clientConfigs = clientEntrypoints.map((clientEntrypoint) => {
   return {
     ...clientConfig,
     name: clientEntrypoint.name,
@@ -164,13 +159,15 @@ const clientConfigs = clientEntrypoints.map(clientEntrypoint => {
       }),
       new HtmlWebpackPlugin({
         template: clientEntrypoint.template,
+        scriptLoading: 'blocking',
         filename: `${clientEntrypoint.filename}${isProd ? '' : '-impl'}.html`,
         inlineSource: '^[^(//)]+.(js|css)$', // embed all js and css inline, exclude packages with '//' for dynamic cdn insertion
       }),
+      // new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/main.js/]),
+      // new HtmlInlineScriptPlugin([/^[^(//)]+.(js|css)$/]),
       // add the generated js code to the html file inline
       new HtmlWebpackInlineSourcePlugin(),
-      // this plugin allows us to add dynamically load packages from a CDN
-      new DynamicCdnWebpackPlugin(DynamicCdnWebpackPluginConfig),
+      // new DynamicCdnWebpackPlugin(dynamicCdnWebpackPluginConfig),
     ],
   };
 });
@@ -179,12 +176,9 @@ const gasWebpackDevServerPath = require.resolve(
   'google-apps-script-webpack-dev-server'
 );
 
-// webpack settings for devServer https://webpack.js.org/configuration/dev-server/
 const devServer = {
   port: PORT,
-  https: true,
-  // run our own route to serve the package google-apps-script-webpack-dev-server
-  before: app => {
+  before: (app) => {
     // this '/gas/' path needs to match the path loaded in the iframe in dev/index.js
     app.get('/gas/*', (req, res) => {
       res.setHeader('Content-Type', 'text/html');
@@ -202,7 +196,7 @@ if (fs.existsSync(keyPath) && fs.existsSync(certPath)) {
 }
 
 // webpack settings for the development client wrapper
-const devClientConfigs = clientEntrypoints.map(clientEntrypoint => {
+const devClientConfigs = clientEntrypoints.map((clientEntrypoint) => {
   envVars.FILENAME = clientEntrypoint.filename;
   return {
     ...clientConfig,
@@ -214,19 +208,22 @@ const devClientConfigs = clientEntrypoints.map(clientEntrypoint => {
       }),
       new HtmlWebpackPlugin({
         template: './dev/index.html',
+        scriptLoading: 'blocking',
         // this should match the html files we load in src/server/ui.js
         filename: `${clientEntrypoint.filename}.html`,
         inlineSource: '^[^(//)]+.(js|css)$', // embed all js and css inline, exclude packages with '//' for dynamic cdn insertion
       }),
+      // new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/main/]),
+      // new HtmlInlineScriptPlugin([/^[^(//)]+.(js|css)$/]),
       new HtmlWebpackInlineSourcePlugin(),
-      new DynamicCdnWebpackPlugin({}),
+      // new DynamicCdnWebpackPlugin({}),
     ],
   };
 });
 
 // webpack settings used by the server-side code
 const serverConfig = {
-  ...sharedClientAndServerConfig,
+  context: __dirname,
   name: 'SERVER',
   // server config can't use 'development' mode
   // https://github.com/fossamagna/gas-webpack-plugin/issues/135
@@ -244,7 +241,7 @@ const serverConfig = {
     rules: [
       // typescript config
       {
-        test: /\.tsx?$/,
+        test: /\.ts$/,
         exclude: /node_modules/,
         use: [
           {
@@ -265,7 +262,6 @@ const serverConfig = {
     minimize: true,
     minimizer: [
       new TerserPlugin({
-        sourceMap: true,
         terserOptions: {
           // ecma 5 is needed to support Rhino "DEPRECATED_ES5" runtime
           // can use ecma 6 if V8 runtime is used
