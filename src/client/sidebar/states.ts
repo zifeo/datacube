@@ -30,7 +30,7 @@ const sql = atom({
   default: isProduction
     ? ''
     : format(
-        'SELECT id.id, createdAt FROM db ORDER BY createdAt DESC LIMIT 1'
+        'SELECT c.vaccine, c.geoRegion, c.entries FROM `datacube-327418.demo.covid19-ch` as c ORDER BY c.date DESC LIMIT 3'
       ),
 });
 
