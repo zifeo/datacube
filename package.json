@@ -19,7 +19,7 @@
   "dependencies": {
     "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.11.2",
-    "codemirror": "^5.61.0",
+    "codemirror": "5.61.0",
     "gas-client": "0.3.0",
     "pretty-bytes": "^5.6.0",
     "react": "^17.0.2",
@@ -30,6 +30,7 @@
     "use-debounce": "^7.0.0"
   },
   "devDependencies": {
+    "@effortlessmotion/dynamic-cdn-webpack-plugin": "^5.0.1",
     "@google/clasp": "^2.4.1",
     "@types/node": "^16.10.1",
     "@typescript-eslint/eslint-plugin": "^4.24.0",

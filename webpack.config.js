@@ -5,6 +5,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const GasPlugin = require('gas-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const DynamicCdnWebpackPlugin = require('@effortlessmotion/dynamic-cdn-webpack-plugin');
 
 const dotenv = require('dotenv').config();
 
@@ -124,7 +125,12 @@ class InlineChunkHtmlPlugin {
     if (asset == null) {
       return tag;
     }
-    return { tagName: 'script', innerHTML: asset.source(), closeTag: true };
+    return {
+      tagName: 'script',
+      innerHTML: asset.source(),
+      attributes: { defer: true },
+      closeTag: true,
+    };
   }
 
   apply(compiler) {
@@ -146,6 +152,46 @@ class InlineChunkHtmlPlugin {
   }
 }
 
+const dynamicCdnWebpackPluginConfig = {
+  verbose: false,
+  resolver: (packageName, packageVersion, options) => {
+    // "name" should match the package being imported
+    // "var" is important to get right -- this should be the exposed global. Look up "webpack externals" for info.
+    switch (packageName) {
+      case 'recoil':
+        // embedded recoil trigger a internal GAS issue, need to externalize it
+        return {
+          name: packageName,
+          var: 'Recoil',
+          version: packageVersion,
+          url: `https://cdn.jsdelivr.net/npm/recoil@${packageVersion}/umd/recoil.${
+            isProd ? 'min.js' : 'js'
+          }`,
+        };
+      case 'react':
+        return {
+          name: packageName,
+          var: 'React',
+          version: packageVersion,
+          url: `https://unpkg.com/react@${packageVersion}/umd/react.${
+            isProd ? 'production.min.js' : 'development.js'
+          }`,
+        };
+      case 'react-dom':
+        return {
+          name: packageName,
+          var: 'ReactDOM',
+          version: packageVersion,
+          url: `https://unpkg.com/react-dom@${packageVersion}/umd/react-dom.${
+            isProd ? 'production.min.js' : 'development.js'
+          }`,
+        };
+      default:
+        return null;
+    }
+  },
+};
+
 const clientConfigs = clientEntrypoints.map((clientEntrypoint) => {
   return {
     ...clientConfig,
@@ -161,11 +207,11 @@ const clientConfigs = clientEntrypoints.map((clientEntrypoint) => {
         publicPath: 'auto',
         hash: true,
         filename: `${clientEntrypoint.filename}${isProd ? '' : '-impl'}.html`,
-        inlineSource: '^[^(//)]+.(js|css).*$', // embed all js and css inline, exclude packages with '//' for dynamic cdn insertion
       }),
       new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [
         new RegExp('^[^(//)]+.(js|css).+$'),
       ]),
+      new DynamicCdnWebpackPlugin(dynamicCdnWebpackPluginConfig),
     ],
   };
 });
@@ -217,6 +263,7 @@ const devClientConfigs = clientEntrypoints.map((clientEntrypoint) => {
       new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [
         new RegExp('^[^(//)]+.(js|css).*$'),
       ]),
+      new DynamicCdnWebpackPlugin({}),
     ],
   };
 });

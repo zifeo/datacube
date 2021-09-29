@@ -18,7 +18,7 @@ const persistence =
 
     onSet((newValue) => {
       if (newValue instanceof DefaultValue) {
-        serverFunctions.removeItem(key);
+        serverFunctions.remove(key);
       } else {
         serverFunctions.set(key, JSON.stringify(newValue));
       }
