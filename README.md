@@ -1,12 +1,11 @@
 # DataCube
 
+Access easily your data and take advantage of Google BigQuery directly from your Google Spreadsheet.
 ## Usage
 
+![Demo](./demo.gif)
 
-remove unused lib
-tune dynamic loader
-
-
+/!\ This library use the native Google & BigQuery API behind. Be sure to verify the quota and do not forget querying BigQuery has a cost.
 
 ## Development
 
@@ -29,7 +28,7 @@ mkdir -p certs
 mkcert -key-file ./certs/key.pem -cert-file ./certs/cert.pem localhost 127.0.0.1
 ```
 
-And it should be ready to access on your newly created sheet (you may need to reload the sheet) and the BigQuery button should appear on the top bar.
+It should be ready to access on your newly created sheet (you may need to reload the sheet) and the BigQuery button should appear on the top bar.
 
 ```
 yarn start

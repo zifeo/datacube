@@ -5,7 +5,7 @@ import { RecoilRoot } from 'recoil';
 import { BQEditor } from './components/BQEditor';
 import './styles.css';
 
-console.log('DataCube init')
+console.log('DataCube init');
 
 const App = () => (
   <RecoilRoot>
